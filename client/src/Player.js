@@ -1,4 +1,4 @@
-import { AnimationMixer, Object3D, Raycaster, TextureLoader, Vector3 } from "three";
+import { AnimationMixer, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, Raycaster, TextureLoader, Vector3 } from "three";
 import Animations from "./Animations";
 
 export default class Player {
@@ -10,7 +10,7 @@ export default class Player {
     this.cameras = null;
     this.mixer = null;
     this.id = null;
-    this.init();
+    this.collider = null;
   }
 
   init(onInit) {
@@ -43,7 +43,7 @@ export default class Player {
 
     FBXLoader.load(`${assets}fbx/people/${this.model}.fbx`, (object) => {
       this.mixer = object.mixer = new AnimationMixer(object);
-      object.name = this.model;
+      object.name = this.id;
       object.traverse((child) => {
         if (child.isMesh) {
           child.castShadow = true;
@@ -63,13 +63,24 @@ export default class Player {
       this.mixer.clipAction(object.animations[0]).play();
       this.object = new Object3D();
       this.object.add(object);
-      this.object.translateX(-100);
-      this.object.translateZ(-500);
-      this.object.rotateY(4.5);
+      this.object.translateX(-700);
+      this.object.translateZ(Math.random() * -3000 - 800);
+      this.object.rotateY(Math.floor(Math.random() > 0.5 ? Math.PI : Math.PI * 2));
       
       if (!this.options) {
         Animations.put('Idle', object.animations[0]);
         this.createCameras();
+        window.local = this;
+      } else {
+        const geometry = new BoxGeometry(125, 300, 125);
+        const material = new MeshBasicMaterial({ visible: false });
+
+        const box = new Mesh(geometry, material);
+        box.name = "collider";
+        box.position.set(0, 150, 0);
+
+        this.object.add(box);
+        this.collider = box;
       }
 
       this.setAction('Idle');
@@ -92,8 +103,9 @@ export default class Player {
     const wide = create(178, 139, 1665);
     const overhead = create(0, 400, 0);
     const collect = create(40, 82, 94);
+    const chat = create(0, 200, -450);
 
-    this.cameras = { front, back, wide, overhead, collect };
+    this.cameras = { front, back, wide, overhead, collect, chat };
     this.setActiveCamera(back);
   }
 
@@ -187,9 +199,44 @@ export default class Player {
           this.object.translateX(intersect[0].distance - 100);
         }
       }
+
+      // cast down
+			dir.set(0, -1, 0);
+			pos.y += 200;
+			raycaster = new Raycaster(pos, dir);
+			const gravity = 30;
+
+			intersect = raycaster.intersectObjects(colliders);
+			if (intersect.length > 0) {
+				const targetY = pos.y - intersect[0].distance;
+
+				if (targetY > this.object.position.y) {
+					this.object.position.y = 0.75 * this.object.position.y + 0.25 * targetY;
+					this.velocityY = 0;
+				} else if (targetY < this.object.position.y) {
+					if (this.velocityY === undefined) {
+            this.velocityY = 0;
+          }
+
+					this.velocityY += delta * gravity;
+					this.object.position.y -= this.velocityY;
+
+					if (this.object.position.y < targetY) {
+						this.velocityY = 0;
+						this.object.position.y = targetY;
+					}
+				}
+			}
     }
 
     this.object.rotateY(delta * this.move.turn); 
     this.game.socket.updatePlayer();
+  }
+
+  update({ x, y, z, heading, pb, action }) {
+    const euler = new Euler(pb, heading, pb);
+    this.object.quaternion.setFromEuler(euler);
+    this.setAction(action);
+    this.object.position.set(x, y, z);
   }
 }

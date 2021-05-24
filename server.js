@@ -31,13 +31,11 @@ io.sockets.on('connection', (socket) => {
     });
   });
 
-  socket.on('init', (data) => {
-    /* socket.userData = {
+  socket.on('init', ({ model, color, x, y, z, heading, pb }) => {
+    socket.userData = {
       action: 'Idle',
       model, color, x, y, z, heading, pb
-    } */
-
-    console.log('init', socket.userData);
+    }
   });
 
   socket.on('update', ({ x, y, z, heading, pb, action }) => {
@@ -46,25 +44,31 @@ io.sockets.on('connection', (socket) => {
       x, y, z, heading, pb, action
     }
   });
+
+  socket.on('chat message', ({ message, id }) => {
+    io.to(id).emit('chat message', { id: socket.id, message });
+    console.log('chat message', message, id);
+  });
 });
 
 http.listen(2002, () => {
   console.log('Server up');
 });
-/* 
+
 setInterval(() => {
+  const idsArray = [...io.sockets.adapter.rooms.values()].map((set) => Array.from(set)[0]);
   const pack = [];
-  let ns = io.of("/");
 
-  const socketIdsArray = Object.keys(io.sockets.sockets);
+  idsArray.forEach((id) => {
+    const socket = io.sockets.sockets.get(id);
 
-  socketIdsArray.forEach((socketId) => {
-    ns.connected[socketId];
+    if (socket.userData.model) {
+      pack.push({
+        id: socket.id,
+        ...socket.userData
+      });
+    }
   });
 
-  console.log(ns.connected[socketIdsArray[0]]?.userData);
-
-  if (pack.length) {
-    io.emit('remoteData', pack);
-  }
-}, 40); */
+  io.emit('remoteData', pack);
+}, 17);

@@ -13,9 +13,10 @@ import {
   Object3D, 
   PerspectiveCamera, 
   PlaneBufferGeometry, 
+  Raycaster, 
   Scene,
   TextureLoader,
-  Vector3,
+  Vector2,
   WebGLRenderer 
 } from 'three';
 
@@ -26,7 +27,9 @@ import Animations from './Animations';
 // hack for FBX Loader
 import * as THREE from 'three';
 import RemotePlayers from './RemotePlayers';
-import Socket from './Socket';
+import GameSocket from './GameSocket';
+import SpeechBubble from './SpeechBubble';
+
 window.THREE = THREE;
 
 
@@ -35,11 +38,13 @@ class Renderer {
     this.player = null;
     this.joystick = null;
     this.environment = null;
+    this.socket = null;
+    this.chatSocketId = null;
     this.colliders = [];
-    this.players = new RemotePlayers();
+    window.remote = this.remotePlayers = new RemotePlayers();
 
     this.scene = new Scene();
-    this.scene.fog = new Fog(0x646464, 5000, 12000);
+    this.scene.fog = new Fog(0xFFB6C1, 4000, 14000);
 
     this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 14000);
     this.camera.position.set(30, 150, 500);
@@ -57,12 +62,14 @@ class Renderer {
     this.initLights();
     this.loadEnvironment();
     this.initControls();
+
+    window.addEventListener('mousedown', (e) => this.onMouseDown(e), false);
   }
 
   loadEnvironment() {
     const assets = './assets/';
 
-    /* this.FBXLoader.load(`${assets}fbx/town.fbx`, (object) => {
+    this.FBXLoader.load(`${assets}fbx/town.fbx`, (object) => {
 			this.environment = object;
 			this.scene.add(object);
             
@@ -90,18 +97,16 @@ class Renderer {
 			this.scene.background = textureCube;
 
       Animations.loadNext(this.FBXLoader, assets, () => {
-        this.player = new Player();
+        this.player = new Player(null, this);
         this.player.init(() => {
           this.scene.add(this.player.object);
-        });
-      });
-    }); */
+          this.socket = new GameSocket(this); 
 
-    Animations.loadNext(this.FBXLoader, assets, () => {
-      this.player = new Player(null, this);
-      this.player.init(() => {
-        this.scene.add(this.player.object);
-        this.socket = new Socket(this);
+          this.speechBubble = new SpeechBubble(this, null);
+          this.speechBubble.init();
+
+          $('.loader').fadeOut(500);
+        });
       });
     });
   }
@@ -113,6 +118,55 @@ class Renderer {
     });
   }
 
+  onMouseDown(e) {
+    if (!this.remotePlayers.data.size || !this.speechBubble) {
+      return;
+    }
+
+    const mouse = new Vector2();
+
+    mouse.x = (e.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = (e.clientY / this.renderer.domElement.clientHeight) * 2 - 1;
+
+    const raycaster = new Raycaster();
+
+    raycaster.setFromCamera(mouse, this.camera);
+
+    const colliders = [...this.remotePlayers.data.values()].map((player) => player.collider);
+    const intersect = raycaster.intersectObjects(colliders);
+
+    if (intersect.length) {
+      const intersectsWith = intersect[0].object;
+      const intersectsPlayer = [...this.remotePlayers.data.values()].filter((player) => player.collider === intersectsWith)[0];
+
+      if (intersectsPlayer) {
+        this.speechBubble.player = intersectsPlayer;
+        this.speechBubble.update('');
+        this.scene.add(this.speechBubble.mesh);
+        this.chatSocketId = intersectsPlayer.id;
+        this.player.setActiveCamera(this.player.cameras.chat);
+        $('.messageWrapper').show();
+      }
+    }
+  }
+
+  onChatMessage(message, id) {
+    const player = this.remotePlayers.get(id);
+    this.speechBubble.player = player;
+    this.speechBubble.update(message);
+    this.scene.add(this.speechBubble.mesh);
+  }
+
+  initPlayer(playerData) {
+    const player = new Player(playerData, this);
+
+    player.init(() => {
+      this.remotePlayers.removeInitialising(playerData.id);
+      this.remotePlayers.put(playerData.id, player);
+      this.scene.add(player.object);
+    });
+  }
+
   initLights() {
     let light = new HemisphereLight(0xffffff, 0x222222);
     light.position.set(0, 200, 0);
@@ -120,14 +174,23 @@ class Renderer {
     this.scene.add(light);
     
     light = new DirectionalLight(0xffb6c1);
-    light.position.set(0, 100, 100);
+    light.position.set( 30, 100, 40 );
+    light.target.position.set( 0, 0, 0 );
     light.castShadow = true;
-    light.shadow.camera.top = 180;
-    light.shadow.camera.bottom = -100;
-    light.shadow.camera.left = -120;
-    light.shadow.camera.right = 120;
+
+		const lightSize = 500;
+    light.shadow.camera.near = 1;
+    light.shadow.camera.far = 500;
+		light.shadow.camera.left = light.shadow.camera.bottom = -lightSize;
+		light.shadow.camera.right = light.shadow.camera.top = lightSize;
+
+    light.shadow.bias = 0.01;
+    light.shadow.mapSize.width = 1024;
+    light.shadow.mapSize.height = 1024;
 
     this.scene.add(light);
+
+    this.sun = light;
   }
 
   onMove(forward, turn) {
@@ -161,6 +224,8 @@ class Renderer {
     } else {
       this.player.move = { forward, turn };
     }
+
+    this.socket.updatePlayer();
   }
 
   renderPlayer(delta) {
@@ -196,20 +261,23 @@ class Renderer {
     }
   }
 
-  renderOtherPlayers() {
-
-  }
-
   loop() {
     window.requestAnimationFrame(() => this.loop());
 
     const delta = Clock.getDelta();
 
-    this.renderPlayer(delta);    
+    this.renderPlayer(delta);   
+    
+    [...this.remotePlayers.data.values()].forEach((player) => player.mixer.update(delta));
+
+    if (this.speechBubble) {
+      this.speechBubble.show(this.player.object.position);
+    }
+
+		this.sun.position.copy(this.camera.position);
+		this.sun.position.y += 10;
 
     this.renderer.render(this.scene, this.camera);
-
-    /* console.log(this.player.object.position) */
   }
 }
 
@@ -218,4 +286,4 @@ setTimeout(() => {
   renderer.loop();
   window.renderer = renderer;
   window.Animations = Animations;
-}, 100)
+}, 100);

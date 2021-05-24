@@ -30,8 +30,6 @@ export default new class Animations {
     loader.load(`${assets}fbx/anims/${current}.fbx`, (object) => {
       this.put(current, object.animations[0]);
 
-      /* console.log('Loaded animation', current); */
-
       // recursively load until array length > 0
       if (this.array.length) {
         this.loadNext(loader, assets, onDone);
