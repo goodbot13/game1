@@ -15,7 +15,7 @@ export default class GameSocket {
         if (game.speechBubble.player?.object === player) {
           game.speechBubble.mesh.visible = false;
           $('.messageWrapper').hide();
-          this.player.setActiveCamera(game.player.cameras.back);
+          game.player.setActiveCamera(game.player.cameras.back);
         }
 
         game.scene.remove(player);

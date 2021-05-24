@@ -72,7 +72,7 @@ export default class Player {
         this.createCameras();
         window.local = this;
       } else {
-        const geometry = new BoxGeometry(125, 300, 125);
+        const geometry = new BoxGeometry(100, 300, 100);
         const material = new MeshBasicMaterial({ visible: false });
 
         const box = new Mesh(geometry, material);
@@ -162,7 +162,7 @@ export default class Player {
 
     if (!blocked) {
       if (this.move.forward > 0) {
-        const speed = this.actionName === 'Running' ? 450 : 175;
+        const speed = this.actionName === 'Running' ? 550 : 190;
         this.object.translateZ(delta * speed);
       } else {
         this.object.translateZ(delta * -30);

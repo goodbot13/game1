@@ -141,7 +141,6 @@ class Renderer {
 
       if (intersectsPlayer) {
         this.speechBubble.player = intersectsPlayer;
-        this.speechBubble.update('');
         this.scene.add(this.speechBubble.mesh);
         this.chatSocketId = intersectsPlayer.id;
         this.player.setActiveCamera(this.player.cameras.chat);
@@ -198,13 +197,17 @@ class Renderer {
 
     const { actionName } = this.player;
 
+    $('.messageWrapper').hide();
+
     if (forward > 0.3) {
       if (actionName !== 'Walking' || actionName !== 'Running') {
         this.player.setAction('Walking');
+        this.player.setActiveCamera(this.player.cameras.back);
       }
     } else if (forward < -0.3) {
       if (actionName !== 'Walking Backwards') {
-        this.player.setAction('Walking Backwards')
+        this.player.setAction('Walking Backwards');
+        this.player.setActiveCamera(this.player.cameras.front);
       }
     } else {
       forward = 0;
@@ -215,6 +218,7 @@ class Renderer {
         }
       } else if (actionName !== 'Idle') {
         this.player.setAction('Idle');
+        this.player.setActiveCamera(this.player.cameras.back);
       }
     }
 

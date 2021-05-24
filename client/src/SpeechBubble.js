@@ -7,7 +7,7 @@ export default class SpeechBubble {
 
       this.cfg = {
           font: 'Calibri',
-          size: 24,
+          size: 26,
           padding: 10,
           color: '#222222',
           width: 256,
@@ -64,7 +64,7 @@ export default class SpeechBubble {
 
     updateText(message, ctx) {
       this.mesh.visible = true;
-      
+
       const words = message.split(' ');
       let line = '';
       const lines = [];
