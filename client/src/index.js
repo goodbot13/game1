@@ -26,12 +26,12 @@ import Animations from './Animations';
 
 // hack for FBX Loader
 import * as THREE from 'three';
+
 import RemotePlayers from './RemotePlayers';
 import GameSocket from './GameSocket';
 import SpeechBubble from './SpeechBubble';
 
 window.THREE = THREE;
-
 
 class Renderer {
   constructor() {
@@ -64,6 +64,14 @@ class Renderer {
     this.initControls();
 
     window.addEventListener('mousedown', (e) => this.onMouseDown(e), false);
+
+    window.addEventListener('resize', (e) => this.onWindowResize(e), false)
+  }
+
+  onWindowResize({ target: { window }}) {
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
   }
 
   loadEnvironment() {

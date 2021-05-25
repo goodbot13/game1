@@ -34,6 +34,8 @@ io.sockets.on('connection', (socket) => {
       action: 'Idle',
       model, color, x, y, z, heading, pb
     }
+
+    console.log('init model', model);
   });
 
   socket.on('update', ({ x, y, z, heading, pb, action }) => {

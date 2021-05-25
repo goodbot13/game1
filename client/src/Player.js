@@ -52,13 +52,18 @@ export default class Player {
       });
       
       const textureLoader = new TextureLoader();
-      textureLoader.load(`${assets}images/SimplePeople_${this.model}_${this.color}.png`, (texture) => { 
+      const path = `${assets}images/SimplePeople_${this.model}_${this.color}.png`;
+
+      textureLoader.load(path, (texture) => { 
+        console.log('texture', texture);
+        console.log('path', path)
+
         object.traverse((child) => {
           if (child.isMesh) {
             child.material.map = texture;
           }
         });
-      });
+      }, undefined, (error) => console.log('Error while loading. Path', path, error));
 
       this.mixer.clipAction(object.animations[0]).play();
       this.object = new Object3D();
