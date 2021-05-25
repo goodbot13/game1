@@ -25,7 +25,6 @@ export default class Player {
         'Doctor', 
         'FireFighter', 
         'Housewife', 
-        'Policeman', 
         'Prostitute', 
         'Punk', 
         'RiotCop', 
