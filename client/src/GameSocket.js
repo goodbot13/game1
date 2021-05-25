@@ -12,16 +12,18 @@ export default class GameSocket {
     });
 
     this.socket.on('deletePlayer', ({ id }) => {
+      console.log('deletePlayer', id, game.remotePlayers.get(id));
+      
       if (game.remotePlayers.has(id)) {
-        const player = game.remotePlayers.get(id).object;
+        const playerObject = game.remotePlayers.get(id).object;
 
-        if (game.speechBubble.player?.object === player) {
+        if (game.speechBubble.player?.object === playerObject) {
           game.speechBubble.mesh.visible = false;
           $('.messageWrapper').hide();
           game.player.setActiveCamera(game.player.cameras.back);
         }
 
-        game.scene.remove(player);
+        game.scene.remove(playerObject);
         game.remotePlayers.remove(id);
       } 
     });
