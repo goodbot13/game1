@@ -34,7 +34,7 @@ export default class Player {
         'RoadWorker', 
         'Robber', 
         'Sheriff', 
-        'StreeMan', 
+        'StreetMan', 
         'Waitress'
       ];
       
