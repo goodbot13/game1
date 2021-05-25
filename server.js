@@ -11,7 +11,9 @@ app.get('/', (req, res) => {
 });
 
 io.sockets.on('connection', (socket) => {
+  console.log('Socket connected', socket.id);
 
+  socket.lastPing = Date.now();
   socket.userData = { 
     x: 0, 
     y: 0, 
@@ -34,8 +36,6 @@ io.sockets.on('connection', (socket) => {
       action: 'Idle',
       model, color, x, y, z, heading, pb
     }
-
-    console.log('init model', model);
   });
 
   socket.on('update', ({ x, y, z, heading, pb, action }) => {
@@ -48,19 +48,29 @@ io.sockets.on('connection', (socket) => {
   socket.on('chat message', ({ message, id }) => {
     io.to(id).emit('chat message', { id: socket.id, message });
   });
+
+  socket.on('ping', () => {
+    socket.lastPing = Date.now();
+    io.to(socket.id).emit('pong');
+  });
 });
 
 http.listen(3075, () => {
   console.log('Server up');
 });
 
-setInterval(() => {
+const getActiveSockets = () => {
   const idsArray = [...io.sockets.adapter.rooms.values()].map((set) => Array.from(set)[0]);
+  const activeSockets = new Array(idsArray.length).fill(null).map((_, index) => io.sockets.sockets.get(idsArray[index]));
+
+  return activeSockets;
+}
+
+setInterval(() => {
+  const activeSockets = getActiveSockets();
   const pack = [];
 
-  idsArray.forEach((id) => {
-    const socket = io.sockets.sockets.get(id);
-
+  activeSockets.forEach((socket) => {
     if (socket.userData.model) {
       pack.push({
         id: socket.id,
@@ -71,3 +81,17 @@ setInterval(() => {
 
   io.emit('remoteData', pack);
 }, 17);
+
+// ping
+setInterval(() => {
+  const sockets = getActiveSockets();
+  const date = Date.now();
+
+  sockets.forEach((socket) => {
+    if (date - socket.lastPing > 5000) {
+      socket.broadcast.emit('deletePlayer', { id: socket.id });
+      socket.disconnect();
+      console.log('socket disconnected due to inactive');
+    }
+  });
+}, 5000);

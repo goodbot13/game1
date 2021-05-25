@@ -65,6 +65,14 @@ export default class GameSocket {
       heading: game.player.object.rotation.y,
       pb: game.player.object.rotation.x
     });
+
+    // ping
+    window.pingId = setInterval(() => this.socket.emit('ping'), 2000);
+
+    // pong
+    this.socket.on('pong', () => {
+      this.lastPong = Date.now();
+    });
   }
 
   updatePlayer() {

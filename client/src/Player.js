@@ -2,7 +2,7 @@ import { AnimationMixer, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, 
 import Animations from "./Animations";
 
 export default class Player {
-  constructor(options, game, model, color) { this.model = model; this.color = color;
+  constructor(options, game) {
     this.game = game;
     this.options = options;
     this.prevAction = null;
@@ -32,7 +32,6 @@ export default class Player {
         'RiotCop', 
         'Robber', 
         'Sheriff', 
-        'Streetman', 
         'Waitress'
       ][Math.floor(Math.random() * 14)];
     }
