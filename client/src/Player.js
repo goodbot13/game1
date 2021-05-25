@@ -30,7 +30,7 @@ export default class Player {
         'RiotCop', 
         'Robber', 
         'Waitress'
-      ][Math.floor(Math.random() * 14)];
+      ][Math.floor(Math.random() * 9)];
     }
     
     const assets = './assets/';
