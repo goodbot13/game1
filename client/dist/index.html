@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+            }
+
+            .messageWrapper {
+                position: absolute;
+                bottom: 32px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: none;
+            }
+            
+            input, button {
+                outline: none;
+                background: rgba(244, 244, 244, .9);
+                border: none;
+                padding: 8px;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+
+            input {
+                width: 300px;
+            }
+
+            .loader {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 9999;
+                background: rgb(10, 10, 10);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                font-size: 17px;
+                font-weight: 60;
+            }
+        </style>
+        <script
+        src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+        crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="libs/inflate.min.js"></script>
+        <script src="bundle.js"></script>
+		<script src="libs/FBXLoader.js"></script>
+		<script src="libs/Detector.js"></script>
+		<script src="libs/toon3d.js"></script>
+    </head>
+    <body>
+        <div class="loader">
+            <div>LOADING...</div>
+        </div>
+        <div class="messageWrapper">
+            <form action="">
+                <input>
+                <button>Send message</button>
+            </form>
+        </div>
+    </body>
+</html>
