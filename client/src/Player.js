@@ -22,7 +22,6 @@ export default class Player {
       this.color = ['Black', 'Brown', 'White'][Math.floor(Math.random() * 3)];
       this.model = [
         'BeachBabe', 
-        'BusinessMan', 
         'Doctor', 
         'FireFighter', 
         'Housewife', 
