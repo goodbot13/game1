@@ -20,7 +20,8 @@ export default class Player {
       this.id = this.options.id;
     } else {
       this.color = ['Black', 'Brown', 'White'][Math.floor(Math.random() * 3)];
-      this.model = [
+
+      const models = [
         'BeachBabe', 
         'Doctor', 
         'FireFighter', 
@@ -30,7 +31,9 @@ export default class Player {
         'RiotCop', 
         'Robber', 
         'Waitress'
-      ][Math.floor(Math.random() * 9)];
+      ];
+      
+      this.model = models[Math.floor(Math.random() * models.length)];
     }
     
     const assets = './assets/';
