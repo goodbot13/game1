@@ -2,6 +2,7 @@ export default class RemotePlayers {
   constructor() {
     this.data = new Map();
     this.initializing = new Map();
+    window.remote = this;
   }
 
   setInitialising(id) {
