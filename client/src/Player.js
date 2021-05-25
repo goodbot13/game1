@@ -30,7 +30,6 @@ export default class Player {
         'Punk', 
         'RiotCop', 
         'Robber', 
-        'Sheriff', 
         'Waitress'
       ][Math.floor(Math.random() * 14)];
     }
