@@ -23,13 +23,23 @@ export default class Player {
 
       const models = [
         'BeachBabe', 
+        'BusinessMan', 
         'Doctor', 
         'FireFighter', 
-        'Housewife', 
-        'Prostitute', 
+        'Hobo',
+        'HouseWife', 
+        'Policeman', 
+        'Pimp',
+        'Prostitute',
+        'Policeman', 
         'Punk', 
         'RiotCop', 
+        'Redneck',
+        'RoadWorker', 
+        'RiotCop',
         'Robber', 
+        'Sheriff', 
+        'StreeMan', 
         'Waitress'
       ];
       
