@@ -2,7 +2,7 @@ export default class GameSocket {
   constructor(game) { 
     this.game = game;
 
-    this.socket = new io.connect('http://localhost:2002');
+    this.socket = new io.connect('http://185.233.119.26:3075');
     this.socket.on('setId', ({ id }) => {
       game.player.id = id;
       game.player.local = true;
