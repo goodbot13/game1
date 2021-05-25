@@ -26,7 +26,6 @@ import Animations from './Animations';
 
 // hack for FBX Loader
 import * as THREE from 'three';
-
 import RemotePlayers from './RemotePlayers';
 import GameSocket from './GameSocket';
 import SpeechBubble from './SpeechBubble';

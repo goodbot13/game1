@@ -2,7 +2,7 @@ import { AnimationMixer, BoxGeometry, Euler, Mesh, MeshBasicMaterial, Object3D, 
 import Animations from "./Animations";
 
 export default class Player {
-  constructor(options, game) {
+  constructor(options, game, model, color) { this.model = model; this.color = color;
     this.game = game;
     this.options = options;
     this.prevAction = null;
@@ -30,7 +30,6 @@ export default class Player {
         'Prostitute', 
         'Punk', 
         'RiotCop', 
-        'Roadworker', 
         'Robber', 
         'Sheriff', 
         'Streetman', 
