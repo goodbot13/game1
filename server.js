@@ -23,8 +23,6 @@ io.sockets.on('connection', (socket) => {
     id: socket.id 
   });
 
-  console.log(socket.id);  
-
   socket.on('disconnect', () => {
     socket.broadcast.emit('deletePlayer', {
       id: socket.id
@@ -47,11 +45,10 @@ io.sockets.on('connection', (socket) => {
 
   socket.on('chat message', ({ message, id }) => {
     io.to(id).emit('chat message', { id: socket.id, message });
-    console.log('chat message', message, id);
   });
 });
 
-http.listen(2002, () => {
+http.listen(3075, () => {
   console.log('Server up');
 });
 
